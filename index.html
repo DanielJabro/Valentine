@@ -7,7 +7,7 @@
   <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet">
   <style>
-    /* Reset and full-page setup */
+    /* RESET & FULL-PAGE SETUP */
     html, body {
       margin: 0;
       padding: 0;
@@ -22,7 +22,7 @@
       color: #fff;
     }
     
-    /* Start Screen */
+    /* START SCREEN */
     #start-screen {
       position: absolute;
       top: 0;
@@ -58,7 +58,23 @@
       background-color: rgba(255,255,255,1);
     }
     
-    /* Compliment Container (covers the full page) */
+    /* INTRO MESSAGE (for the "so..." and follow-up text) */
+    #intro-message {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-size: 2.5rem;
+      transition: opacity 0.5s ease;
+    }
+    
+    /* COMPLIMENT CONTAINER (covers the full page) */
     #compliment-container {
       position: absolute;
       top: 0;
@@ -75,14 +91,35 @@
       white-space: nowrap;
     }
     
-    /* Heart styling – these will be animated via JavaScript */
+    /* HEART STYLE (animated via JavaScript) */
     .heart {
       position: absolute;
       font-size: 24px;
       pointer-events: none;
     }
     
-    /* Final Question */
+    /* BAR GRAPH CONTAINER */
+    #bar-graph {
+      position: absolute;
+      bottom: 10%;
+      left: 10%;
+      width: 80%;
+      height: 50%;
+      z-index: 12;
+      display: none; /* Initially hidden */
+      align-items: flex-end;
+      justify-content: space-around;
+      gap: 20px;
+      transition: opacity 1s ease;
+    }
+    .bar {
+      background-color: rgba(255,255,255,0.8);
+      width: 15%;
+      height: 0;
+      transition: height 1s ease;
+    }
+    
+    /* FINAL QUESTION */
     #final-question {
       position: absolute;
       top: 0;
@@ -105,6 +142,11 @@
       font-size: 2rem;
       margin-bottom: 20px;
     }
+    /* Container for final buttons, side by side */
+    #final-buttons {
+      display: flex;
+      gap: 20px;
+    }
     #final-question button {
       padding: 10px 20px;
       font-size: 1.2rem;
@@ -113,7 +155,6 @@
       cursor: pointer;
       background-color: rgba(255,255,255,0.8);
       color: #ff6f91;
-      margin: 0 10px;
       transition: background-color 0.3s;
     }
     #final-question button:hover {
@@ -122,29 +163,43 @@
   </style>
 </head>
 <body>
-  <!-- Start Screen -->
+  <!-- START SCREEN -->
   <div id="start-screen">
     <h1>Click here for a surprise</h1>
     <button id="start-btn">Enter</button>
   </div>
   
-  <!-- Compliment Container -->
+  <!-- INTRO MESSAGE -->
+  <div id="intro-message"></div>
+  
+  <!-- COMPLIMENT CONTAINER -->
   <div id="compliment-container"></div>
   
-  <!-- Final Question -->
+  <!-- BAR GRAPH CONTAINER -->
+  <div id="bar-graph">
+    <div class="bar" data-final="20%"></div>
+    <div class="bar" data-final="40%"></div>
+    <div class="bar" data-final="60%"></div>
+    <div class="bar" data-final="80%"></div>
+  </div>
+  
+  <!-- FINAL QUESTION -->
   <div id="final-question">
     <h1>Will you be my Valentine?</h1>
-    <button id="yes-btn">Yes</button>
-    <button id="no-btn">No</button>
+    <div id="final-buttons">
+      <button id="yes-btn">Yes</button>
+      <button id="no-btn">No</button>
+    </div>
   </div>
   
   <script>
     // Get DOM elements
     const startScreen = document.getElementById('start-screen');
     const startBtn = document.getElementById('start-btn');
+    const introMessage = document.getElementById('intro-message');
     const complimentContainer = document.getElementById('compliment-container');
     const finalQuestion = document.getElementById('final-question');
-    
+
     // Array of compliment objects (each with text and an image)
     const compliments = [
       { text: "You are radiant.", image: "https://via.placeholder.com/100?text=Radiant" },
@@ -159,10 +214,37 @@
     
     let complimentInterval;
     
-    // When the user clicks "Enter"
+    /* -------- INTRO SEQUENCE -------- */
+    function showIntroSequence() {
+      introMessage.style.display = 'flex';
+      introMessage.style.opacity = 0;
+      introMessage.textContent = "so...";
+      // Fade in "so..."
+      setTimeout(() => {
+        introMessage.style.opacity = 1;
+      }, 100); 
+      // After 2 seconds, fade out and change text
+      setTimeout(() => {
+        introMessage.style.opacity = 0;
+        setTimeout(() => {
+          introMessage.textContent = "I just have some thoughts to share";
+          introMessage.style.opacity = 1;
+          // Display for 2 seconds, then fade out and proceed
+          setTimeout(() => {
+            introMessage.style.opacity = 0;
+            setTimeout(() => {
+              introMessage.style.display = 'none';
+              startCompliments();
+            }, 500);
+          }, 2000);
+        }, 500);
+      }, 2000);
+    }
+    
+    /* -------- START BUTTON HANDLER -------- */
     startBtn.addEventListener('click', () => {
       // Dynamically create the YouTube iframe using your provided link.
-      // We append "&autoplay=1" to the URL so that it starts automatically.
+      // We append "&autoplay=1" so that it starts automatically.
       const youtubeFrame = document.createElement('iframe');
       youtubeFrame.src = "https://www.youtube.com/embed/9Yy4-LCOi34?si=gMtPGdsyG6jJxyzw&autoplay=1";
       youtubeFrame.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
@@ -178,11 +260,12 @@
       startScreen.classList.add('fade-out');
       setTimeout(() => {
         startScreen.style.display = 'none';
-        startCompliments();
+        // Begin the intro message sequence.
+        showIntroSequence();
       }, 1000); // 1 second fade-out duration
     });
     
-    // Begin the compliment & image phase (adding a new element every second)
+    /* -------- COMPLIMENT PHASE -------- */
     function startCompliments() {
       complimentContainer.style.display = 'block';
       complimentInterval = setInterval(addCompliment, 1000);  // one every second
@@ -211,7 +294,7 @@
       }, 50);
     }
     
-    // Trigger explosion: remove each compliment and spawn multiple hearts from its location
+    /* -------- HEART EXPLOSION (with projectile motion) -------- */
     function triggerExplosion() {
       clearInterval(complimentInterval);
       const comps = document.querySelectorAll('.compliment');
@@ -223,19 +306,19 @@
         const startX = rect.left - containerRect.left;
         // Remove the compliment element
         comp.remove();
-        // Spawn several hearts (for example, 5 hearts per compliment)
-        for (let i = 0; i < 5; i++) {
+        // Spawn several hearts (here, 8 hearts per compliment)
+        for (let i = 0; i < 8; i++) {
           spawnHeart(startX, startY);
         }
       });
-      // After 3 seconds (when explosion animation completes), hide the container and show the final question
+      // After 3 seconds (when explosion animation completes), hide the compliment container and show the bar graph.
       setTimeout(() => {
         complimentContainer.style.display = 'none';
-        showFinalQuestion();
+        showBarGraph();
       }, 3000);
     }
     
-    // Spawn a heart at a given (startX, startY) position and animate it using projectile motion (constant acceleration)
+    // Spawn a heart at a given (startX, startY) position and animate it using projectile motion (with constant acceleration)
     function spawnHeart(startX, startY) {
       const heart = document.createElement('div');
       heart.className = 'heart';
@@ -248,7 +331,7 @@
       complimentContainer.appendChild(heart);
       
       // Randomize initial velocities (in pixels per second)
-      // Horizontal velocity (vx): between -300 and 300 px/s (no horizontal acceleration)
+      // Horizontal velocity (vx): between -300 and 300 px/s
       const vx = Math.random() * 600 - 300;
       // Vertical velocity (vy): choose an initial upward velocity between -600 and -300 px/s.
       const vy = Math.random() * (-300) - 300; 
@@ -262,21 +345,42 @@
       function animateHeart() {
         const elapsed = (Date.now() - startTime) / 1000; // elapsed time in seconds
         if (elapsed < duration) {
-          // Horizontal displacement: x = vx * t (constant velocity)
+          // Horizontal displacement: x = vx * t
           const dx = vx * elapsed;
-          // Vertical displacement: y = vy * t + 0.5 * g * t² (constant acceleration due to gravity)
+          // Vertical displacement: y = vy * t + 0.5 * g * t^2
           const dy = vy * elapsed + 0.5 * g * elapsed * elapsed;
           heart.style.transform = `translate(${dx}px, ${dy}px)`;
           requestAnimationFrame(animateHeart);
         } else {
-          // At the end of the animation, remove the heart.
           heart.remove();
         }
       }
       requestAnimationFrame(animateHeart);
     }
     
-    // Display the final question
+    /* -------- BAR GRAPH ANIMATION -------- */
+    function showBarGraph() {
+      const barGraph = document.getElementById('bar-graph');
+      barGraph.style.display = 'flex';
+      barGraph.style.opacity = 1;
+      const bars = document.querySelectorAll('.bar');
+      // Animate the bars sequentially from left to right.
+      bars.forEach((bar, index) => {
+        setTimeout(() => {
+          bar.style.height = bar.getAttribute('data-final');
+        }, index * 1000);
+      });
+      // After all bars have grown, wait 1 extra second, then fade out the bar graph and show the final question.
+      setTimeout(() => {
+        barGraph.style.opacity = 0;
+        setTimeout(() => {
+          barGraph.style.display = 'none';
+          showFinalQuestion();
+        }, 1000);
+      }, bars.length * 1000 + 1000);
+    }
+    
+    /* -------- FINAL QUESTION -------- */
     function showFinalQuestion() {
       finalQuestion.style.display = 'flex';
       setTimeout(() => {
