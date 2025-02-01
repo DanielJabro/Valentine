@@ -16,6 +16,7 @@
       overflow: hidden; /* No scrolling */
     }
     body {
+      /* A cute, color-changing background using a linear gradient */
       font-family: 'Montserrat', sans-serif;
       background: linear-gradient(45deg, #ff9a9e, #fad0c4);
       position: relative;
@@ -32,7 +33,7 @@
       justify-content: center;
       align-items: center;
       text-align: center;
-      transition: opacity 1s ease;
+      transition: opacity 2s ease; /* Slower fading */
     }
     .hidden {
       display: none;
@@ -84,7 +85,7 @@
       transition: opacity 0.5s ease;
       white-space: nowrap;
     }
-    /* Heart styling – these will be animated via JS */
+    /* Heart styling – these are animated via JS */
     .heart {
       position: absolute;
       font-size: 24px;
@@ -99,6 +100,7 @@
       height: 60%;
       z-index: 12;
       display: none;
+      transition: opacity 2s ease;
     }
     .bar {
       background-color: rgba(255,255,255,0.8);
@@ -144,7 +146,7 @@
     </div>
   </div>
   
-  <!-- Message Container (used for intro and final messages) -->
+  <!-- Message Container (for intro and final messages) -->
   <div id="message-container" class="full-screen hidden">
     <h1 id="message-text"></h1>
   </div>
@@ -195,11 +197,11 @@
 
     // When "Enter" is clicked…
     startBtn.addEventListener('click', () => {
-      // Create YouTube iframe (with autoplay, loop & playlist so the video repeats)
+      // Create YouTube iframe (with autoplay, loop & playlist so it repeats)
       const youtubeFrame = document.createElement('iframe');
       youtubeFrame.src = "https://www.youtube.com/embed/9Yy4-LCOi34?si=gMtPGdsyG6jJxyzw&autoplay=1&loop=1&playlist=9Yy4-LCOi34";
       youtubeFrame.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
-      // Hide it off-screen
+      // Hide the iframe off-screen
       youtubeFrame.style.position = 'absolute';
       youtubeFrame.style.left = '-9999px';
       youtubeFrame.style.width = '0';
@@ -207,12 +209,12 @@
       youtubeFrame.style.border = '0';
       document.body.appendChild(youtubeFrame);
       
-      // Fade out the start screen
+      // Fade out the start screen (using a slower fade)
       startScreen.style.opacity = 0;
       setTimeout(() => {
         startScreen.classList.add('hidden');
         showIntroMessages();
-      }, 1000);
+      }, 2000);
     });
 
     // Show introductory messages in sequence ("so..." then "I just have some thoughts to share")
@@ -222,7 +224,7 @@
       messageText.textContent = "so...";
       messageContainer.style.opacity = 1;
       setTimeout(() => {
-        // Fade out first message
+        // Fade out first message (slow fade)
         messageContainer.style.opacity = 0;
         setTimeout(() => {
           // Change text to second message and fade in
@@ -234,10 +236,10 @@
             setTimeout(() => {
               messageContainer.classList.add('hidden');
               startCompliments();
-            }, 1000);
-          }, 2000);
-        }, 1000);
-      }, 2000);
+            }, 2000);
+          }, 2500);
+        }, 2000);
+      }, 2500);
     }
 
     // Start the compliment phase (add one compliment per second for 15 seconds)
@@ -247,7 +249,7 @@
       setTimeout(triggerExplosion, 15000);
     }
 
-    // Add a compliment with image & text at a random position
+    // Add a compliment (with image & text) at a random position
     function addCompliment() {
       const comp = document.createElement('div');
       comp.className = 'compliment';
@@ -274,8 +276,8 @@
         const startY = rect.top - containerRect.top;
         const startX = rect.left - containerRect.left;
         comp.remove();
-        // Spawn more hearts now (10 hearts per compliment)
-        for (let i = 0; i < 10; i++) {
+        // Spawn more hearts now (15 hearts per compliment)
+        for (let i = 0; i < 15; i++) {
           spawnHeart(startX, startY);
         }
       });
@@ -296,7 +298,7 @@
       heart.style.transform = 'translate(0, 0)';
       complimentContainer.appendChild(heart);
       
-      // Random initial velocities (pixels per second)
+      // Randomize initial velocities (in pixels per second)
       const vx = Math.random() * 600 - 300;             // Horizontal between -300 and 300
       const vy = Math.random() * (-300) - 300;            // Upward between -300 and -600
       const g = 1000;  // Gravitational acceleration (px/s²)
@@ -320,26 +322,25 @@
     // Show the bar graph animation
     function showBarGraph() {
       barGraphContainer.style.display = 'block';
-      // Define target widths for the 4 bars (last bar is insanely long)
+      barGraphContainer.style.opacity = 1;
+      // Define target widths for the 4 bars (the last bar is insanely long)
       const targetWidths = ["20%", "35%", "50%", "120%"];
-      // Animate each bar sequentially (from left to right)
       for (let i = 1; i <= 4; i++) {
         const bar = document.getElementById('bar' + i);
-        // Ensure initial width is 0
         bar.style.width = "0";
-        // Delay the animation for each bar (e.g., 500ms apart)
+        // Delay each bar's growth sequentially (500ms apart)
         setTimeout(() => {
           bar.style.width = targetWidths[i - 1];
         }, i * 500);
       }
-      // After all bars have animated, wait 2 seconds then proceed to final intro messages
+      // After all bars animate, leave the bar graph page for a bit longer (3 seconds extra) before moving on
       setTimeout(() => {
         barGraphContainer.style.opacity = 0;
         setTimeout(() => {
           barGraphContainer.style.display = 'none';
           showFinalIntroMessages();
-        }, 1000);
-      }, 500 * 4 + 2000);
+        }, 2000);
+      }, 500 * 4 + 3000);
     }
 
     // Show final intro messages ("Now" then "I just have one question to ask")
@@ -357,13 +358,13 @@
             setTimeout(() => {
               messageContainer.classList.add('hidden');
               showFinalQuestion();
-            }, 1000);
-          }, 2000);
-        }, 1000);
-      }, 2000);
+            }, 2000);
+          }, 2500);
+        }, 2000);
+      }, 2500);
     }
 
-    // Finally, show the final question with the Valentine options
+    // Finally, show the final question with Valentine options
     function showFinalQuestion() {
       finalQuestion.style.display = 'flex';
       setTimeout(() => {
