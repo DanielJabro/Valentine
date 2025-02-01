@@ -7,7 +7,7 @@
   <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet">
   <style>
-    /* Basic reset and full-page setup */
+    /* Reset and full-page setup */
     html, body {
       margin: 0;
       padding: 0;
@@ -75,27 +75,11 @@
       white-space: nowrap;
     }
     
-    /* Heart element style and explosion animation (with gravity-like arc) */
+    /* Heart styling – these will be animated via JavaScript */
     .heart {
       position: absolute;
       font-size: 24px;
       pointer-events: none;
-      animation: explode 3s forwards;
-    }
-    @keyframes explode {
-      0% {
-        transform: translate(0, 0) scale(1);
-        opacity: 1;
-      }
-      40% {
-        /* Move 40% of the way but lift upward by 50px */
-        transform: translate(calc(var(--tx) * 0.4), calc(var(--ty) * 0.4 - 50px)) scale(1.1);
-        opacity: 1;
-      }
-      100% {
-        transform: translate(var(--tx), var(--ty)) scale(0.5);
-        opacity: 0;
-      }
     }
     
     /* Final Question */
@@ -161,7 +145,7 @@
     const complimentContainer = document.getElementById('compliment-container');
     const finalQuestion = document.getElementById('final-question');
     
-    // Array of compliment objects (with text and image)
+    // Array of compliment objects (each with text and an image)
     const compliments = [
       { text: "You are radiant.", image: "https://via.placeholder.com/100?text=Radiant" },
       { text: "Your laugh is infectious.", image: "https://via.placeholder.com/100?text=Laugh" },
@@ -177,43 +161,43 @@
     
     // When the user clicks "Enter"
     startBtn.addEventListener('click', () => {
-      // Dynamically create the Spotify iframe (to help trigger autoplay)
-      const spotifyFrame = document.createElement('iframe');
-      spotifyFrame.src = "https://open.spotify.com/embed/playlist/4sXPYlJMOZxEk2d5jzASBS?utm_source=generator&autoplay=1";
-      spotifyFrame.setAttribute('allow', 'autoplay; encrypted-media');
-      spotifyFrame.style.position = 'absolute';
-      spotifyFrame.style.left = '-9999px';
-      spotifyFrame.style.width = '0';
-      spotifyFrame.style.height = '0';
-      spotifyFrame.style.border = '0';
-      document.body.appendChild(spotifyFrame);
+      // Dynamically create the YouTube iframe using your provided link.
+      // We append "&autoplay=1" to the URL so that it starts automatically.
+      const youtubeFrame = document.createElement('iframe');
+      youtubeFrame.src = "https://www.youtube.com/embed/9Yy4-LCOi34?si=gMtPGdsyG6jJxyzw&autoplay=1";
+      youtubeFrame.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+      // Hide the iframe off-screen
+      youtubeFrame.style.position = 'absolute';
+      youtubeFrame.style.left = '-9999px';
+      youtubeFrame.style.width = '0';
+      youtubeFrame.style.height = '0';
+      youtubeFrame.style.border = '0';
+      document.body.appendChild(youtubeFrame);
       
-      // Fade out the start screen
+      // Fade out the start screen.
       startScreen.classList.add('fade-out');
       setTimeout(() => {
         startScreen.style.display = 'none';
         startCompliments();
-      }, 1000); // Fade-out duration
+      }, 1000); // 1 second fade-out duration
     });
     
-    // Begin the compliment & image phase (slower pace)
+    // Begin the compliment & image phase (adding a new element every second)
     function startCompliments() {
       complimentContainer.style.display = 'block';
-      // Add a new compliment every 1 second
-      complimentInterval = setInterval(addCompliment, 1000);
-      // After 15 seconds, trigger the explosion
-      setTimeout(triggerExplosion, 15000);
+      complimentInterval = setInterval(addCompliment, 1000);  // one every second
+      setTimeout(triggerExplosion, 15000); // After 15 seconds, trigger explosion
     }
     
-    // Add a compliment (with an image) at a random position on the page
+    // Add a compliment (with image and text) at a random position
     function addCompliment() {
       const comp = document.createElement('div');
       comp.className = 'compliment';
       // Select a random compliment object
       const data = compliments[Math.floor(Math.random() * compliments.length)];
-      // Include both the image and text
+      // Include both image and text
       comp.innerHTML = `<img src="${data.image}" alt="compliment image" style="vertical-align:middle; margin-right:5px;"> <span>${data.text}</span>`;
-      // Randomly position the element (using percentages)
+      // Position randomly (using percentages)
       const randomTop = Math.random() * 90;
       const randomLeft = Math.random() * 90;
       comp.style.top = randomTop + '%';
@@ -227,48 +211,72 @@
       }, 50);
     }
     
-    // Trigger the explosion: replace each compliment with multiple hearts that fly out with gravity
+    // Trigger explosion: remove each compliment and spawn multiple hearts from its location
     function triggerExplosion() {
       clearInterval(complimentInterval);
-      // Get all compliment elements
       const comps = document.querySelectorAll('.compliment');
       comps.forEach(comp => {
-        // Get the position of the compliment relative to the container
+        // Get position of the element relative to the container
         const rect = comp.getBoundingClientRect();
         const containerRect = complimentContainer.getBoundingClientRect();
-        const top = rect.top - containerRect.top;
-        const left = rect.left - containerRect.left;
+        const startY = rect.top - containerRect.top;
+        const startX = rect.left - containerRect.left;
         // Remove the compliment element
         comp.remove();
-        // Spawn several hearts (e.g., 3 hearts) from this location
-        for (let i = 0; i < 3; i++) {
-          spawnHeart(top, left);
+        // Spawn several hearts (for example, 5 hearts per compliment)
+        for (let i = 0; i < 5; i++) {
+          spawnHeart(startX, startY);
         }
       });
-      // After 3 seconds (when explosions finish), hide the compliment container and show the final question
+      // After 3 seconds (when explosion animation completes), hide the container and show the final question
       setTimeout(() => {
         complimentContainer.style.display = 'none';
         showFinalQuestion();
       }, 3000);
     }
     
-    // Spawn a heart at a given (top, left) position with random explosion directions
-    function spawnHeart(top, left) {
+    // Spawn a heart at a given (startX, startY) position and animate it using projectile motion (constant acceleration)
+    function spawnHeart(startX, startY) {
       const heart = document.createElement('div');
       heart.className = 'heart';
       heart.textContent = '❤️';
-      heart.style.top = top + 'px';
-      heart.style.left = left + 'px';
-      // Generate a random horizontal displacement (tx) between -300px and 300px
-      const tx = (Math.random() * 600 - 300);
-      // Generate a random vertical displacement (ty) between 300px and 600px (always downward for gravity)
-      const ty = (300 + Math.random() * 300);
-      heart.style.setProperty('--tx', tx + 'px');
-      heart.style.setProperty('--ty', ty + 'px');
+      // Position the heart at the starting location
+      heart.style.top = startY + 'px';
+      heart.style.left = startX + 'px';
+      // Initialize with no transform offset
+      heart.style.transform = 'translate(0, 0)';
       complimentContainer.appendChild(heart);
+      
+      // Randomize initial velocities (in pixels per second)
+      // Horizontal velocity (vx): between -300 and 300 px/s (no horizontal acceleration)
+      const vx = Math.random() * 600 - 300;
+      // Vertical velocity (vy): choose an initial upward velocity between -600 and -300 px/s.
+      const vy = Math.random() * (-300) - 300; 
+      
+      // Gravitational acceleration (in pixels per second squared)
+      const g = 1000;  
+      const duration = 3; // seconds
+      const startTime = Date.now();
+      
+      // Animate using requestAnimationFrame for a smooth, physics-based motion.
+      function animateHeart() {
+        const elapsed = (Date.now() - startTime) / 1000; // elapsed time in seconds
+        if (elapsed < duration) {
+          // Horizontal displacement: x = vx * t (constant velocity)
+          const dx = vx * elapsed;
+          // Vertical displacement: y = vy * t + 0.5 * g * t² (constant acceleration due to gravity)
+          const dy = vy * elapsed + 0.5 * g * elapsed * elapsed;
+          heart.style.transform = `translate(${dx}px, ${dy}px)`;
+          requestAnimationFrame(animateHeart);
+        } else {
+          // At the end of the animation, remove the heart.
+          heart.remove();
+        }
+      }
+      requestAnimationFrame(animateHeart);
     }
     
-    // Display the final question with the Valentine options
+    // Display the final question
     function showFinalQuestion() {
       finalQuestion.style.display = 'flex';
       setTimeout(() => {
@@ -276,7 +284,7 @@
       }, 50);
     }
     
-    // Optional: Handle final answer buttons
+    // Final question button handlers (customize as desired)
     document.getElementById('yes-btn').addEventListener('click', () => {
       alert("Yay! I'm so happy!");
     });
