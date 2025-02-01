@@ -50,12 +50,12 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      background-color: rgba(255, 255, 255, 0.8);
+      background-color: rgba(255,255,255,0.8);
       color: #ff6f91;
       transition: background-color 0.3s;
     }
     #start-screen button:hover {
-      background-color: rgba(255, 255, 255, 1);
+      background-color: rgba(255,255,255,1);
     }
     
     /* Compliment Container (covers the full page) */
@@ -72,23 +72,7 @@
       position: absolute;
       opacity: 0;
       transition: opacity 0.5s ease;
-    }
-    
-    /* Heart Rain Animation */
-    .heart-rain {
-      /* When the explosion happens, change the text to a heart and animate its fall */
-      animation: rain 3s forwards;
-      font-size: 24px;
-    }
-    @keyframes rain {
-      0% {
-        transform: translateY(0) rotate(0deg);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(100vh) rotate(360deg);
-        opacity: 0;
-      }
+      white-space: nowrap;
     }
     
     /* Final Question */
@@ -120,13 +104,13 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      background-color: rgba(255, 255, 255, 0.8);
+      background-color: rgba(255,255,255,0.8);
       color: #ff6f91;
       margin: 0 10px;
       transition: background-color 0.3s;
     }
     #final-question button:hover {
-      background-color: rgba(255, 255, 255, 1);
+      background-color: rgba(255,255,255,1);
     }
   </style>
 </head>
@@ -147,11 +131,8 @@
     <button id="no-btn">No</button>
   </div>
   
-  <!-- Hidden Spotify iframe for autoplaying music -->
-  <iframe id="spotify" src="https://open.spotify.com/embed/playlist/4sXPYlJMOZxEk2d5jzASBS?utm_source=generator&autoplay=1" 
-          allow="autoplay" 
-          style="position:absolute; left:-9999px; width:0; height:0; border:0;">
-  </iframe>
+  <!-- Hidden Spotify iframe for autoplaying music (src is set on click) -->
+  <iframe id="spotify" allow="autoplay; encrypted-media" style="position:absolute; left:-9999px; width:0; height:0; border:0;"></iframe>
   
   <script>
     // Get DOM elements
@@ -159,89 +140,104 @@
     const startBtn = document.getElementById('start-btn');
     const complimentContainer = document.getElementById('compliment-container');
     const finalQuestion = document.getElementById('final-question');
+    const spotifyFrame = document.getElementById('spotify');
     
-    // Array of compliment phrases
+    // Array of compliment objects (each with text and an image)
     const compliments = [
-      "You are radiant.",
-      "Your laugh is infectious.",
-      "You light up the room.",
-      "Your smile is enchanting.",
-      "You are a true gem.",
-      "Your kindness knows no bounds.",
-      "You make life beautiful.",
-      "Your energy is captivating."
+      { text: "You are radiant.", image: "https://via.placeholder.com/100?text=Radiant" },
+      { text: "Your laugh is infectious.", image: "https://via.placeholder.com/100?text=Laugh" },
+      { text: "You light up the room.", image: "https://via.placeholder.com/100?text=Light" },
+      { text: "Your smile is enchanting.", image: "https://via.placeholder.com/100?text=Smile" },
+      { text: "You are a true gem.", image: "https://via.placeholder.com/100?text=Gem" },
+      { text: "Your kindness knows no bounds.", image: "https://via.placeholder.com/100?text=Kindness" },
+      { text: "You make life beautiful.", image: "https://via.placeholder.com/100?text=Beautiful" },
+      { text: "Your energy is captivating.", image: "https://via.placeholder.com/100?text=Energy" }
     ];
     
     let complimentInterval;
     
-    // When the start button is clicked...
+    // When the user clicks "Enter"
     startBtn.addEventListener('click', () => {
+      // Set the Spotify iframe's src to trigger music playback
+      spotifyFrame.src = "https://open.spotify.com/embed/playlist/4sXPYlJMOZxEk2d5jzASBS?utm_source=generator&autoplay=1";
+      
       // Fade out the start screen
       startScreen.classList.add('fade-out');
       setTimeout(() => {
         startScreen.style.display = 'none';
-        // Music will now autoplay via the hidden Spotify iframe.
+        // Begin the compliment (and image) phase
         startCompliments();
-      }, 1000); // Matches fade-out duration
+      }, 1000);
     });
     
-    // Begin adding compliments at random positions
+    // Begin the compliment phase (with a slower pace)
     function startCompliments() {
       complimentContainer.style.display = 'block';
-      // Add a new compliment every 500ms
-      complimentInterval = setInterval(addCompliment, 500);
-      // After 10 seconds, trigger the explosion into hearts
-      setTimeout(triggerExplosion, 10000);
+      // Add a new compliment every 1000ms (1 second)
+      complimentInterval = setInterval(addCompliment, 1000);
+      // After 15 seconds, trigger the explosion into hearts
+      setTimeout(triggerExplosion, 15000);
     }
     
-    // Add a single compliment element at a random position
+    // Add a compliment (with its image) at a random location
     function addCompliment() {
       const comp = document.createElement('div');
       comp.className = 'compliment';
-      // Select a random compliment from the array
-      comp.textContent = compliments[Math.floor(Math.random() * compliments.length)];
-      // Position it randomly within the container (avoid edges with 0-90% range)
+      // Pick a random compliment object
+      const data = compliments[Math.floor(Math.random() * compliments.length)];
+      // Insert both image and text
+      comp.innerHTML = `<img src="${data.image}" alt="compliment image" style="vertical-align:middle; margin-right:5px;"> <span>${data.text}</span>`;
+      // Randomly position the element (using percentages to cover the page)
       const randomTop = Math.random() * 90;
       const randomLeft = Math.random() * 90;
       comp.style.top = randomTop + '%';
       comp.style.left = randomLeft + '%';
-      // Set a random font size between 16px and 26px
+      // Random font size between 16px and 26px
       comp.style.fontSize = (16 + Math.random() * 10) + 'px';
-      // Append to the container
       complimentContainer.appendChild(comp);
-      // Fade in the compliment
+      // Fade it in
       setTimeout(() => {
         comp.style.opacity = 1;
       }, 50);
     }
     
-    // Trigger the "explosion": convert all compliments into hearts that rain down
+    // Trigger the explosion: convert all compliments to hearts that fly in every direction
     function triggerExplosion() {
       clearInterval(complimentInterval);
       const comps = document.querySelectorAll('.compliment');
       comps.forEach(comp => {
-        // Change the text to a heart symbol
-        comp.textContent = '❤️';
-        // Add the heart rain animation class
-        comp.classList.add('heart-rain');
+        // Change the content to a heart emoji
+        comp.innerHTML = '❤️';
+        // Prepare a transition for transform and opacity (3 seconds)
+        comp.style.transition = 'transform 3s ease-out, opacity 3s ease-out';
+        // Generate a random angle (0 to 2π radians)
+        const angle = Math.random() * 2 * Math.PI;
+        // Generate a random distance between 200px and 600px
+        const distance = 200 + Math.random() * 400;
+        const translateX = Math.cos(angle) * distance;
+        const translateY = Math.sin(angle) * distance;
+        // Slight delay to ensure transition is applied, then set the transform and fade out
+        setTimeout(() => {
+          comp.style.transform = `translate(${translateX}px, ${translateY}px)`;
+          comp.style.opacity = 0;
+        }, 50);
       });
-      // After the hearts have rained down (3 seconds), display the final question
+      // After 3 seconds (when the explosion is done), hide the compliment container and show the final question
       setTimeout(() => {
         complimentContainer.style.display = 'none';
         showFinalQuestion();
       }, 3000);
     }
     
-    // Show the final question asking "Will you be my Valentine?"
+    // Display the final question
     function showFinalQuestion() {
       finalQuestion.style.display = 'flex';
-      // Small delay to allow the opacity transition to occur
       setTimeout(() => {
         finalQuestion.classList.add('visible');
       }, 50);
     }
     
-    // Optional: Handle the final question buttons
+    // Final question button actions (customize as desired)
     document.getElementById('yes-btn').addEventListener('click', () => {
       alert("Yay! I'm so happy!");
     });
