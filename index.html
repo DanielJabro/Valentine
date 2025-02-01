@@ -4,34 +4,41 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Surprise!</title>
-  <!-- A nice Google Font -->
+  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet">
   <style>
-    /* Overall page styling */
-    body {
+    /* Basic reset and full-page setup */
+    html, body {
       margin: 0;
       padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden; /* Prevent scrolling */
+    }
+    body {
       font-family: 'Montserrat', sans-serif;
       background: linear-gradient(45deg, #ff9a9e, #fad0c4);
-      height: 100vh;
+      position: relative;
+      color: #fff;
+    }
+    
+    /* Start Screen */
+    #start-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
-      color: #fff;
+      align-items: center;
       text-align: center;
+      transition: opacity 1s ease;
     }
-    
-    /* Fade-out animation */
-    .fade-out {
+    #start-screen.fade-out {
       opacity: 0;
-      transition: opacity 1s ease;
-    }
-    
-    /* Start screen styling */
-    #start-screen {
-      opacity: 1;
-      transition: opacity 1s ease;
     }
     #start-screen h1 {
       font-size: 2.5rem;
@@ -51,42 +58,56 @@
       background-color: rgba(255, 255, 255, 1);
     }
     
-    /* Compliment container styling */
+    /* Compliment Container (covers the full page) */
     #compliment-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+      display: none; /* Initially hidden */
+    }
+    .compliment {
+      position: absolute;
       opacity: 0;
-      transition: opacity 1s ease;
-    }
-    /* When visible, the container is fully opaque */
-    #compliment-container.visible {
-      opacity: 1;
-    }
-    /* The compliment content fades in/out */
-    #compliment {
-      margin: 20px;
-      opacity: 0;
-      transition: opacity 1s ease;
-    }
-    #compliment.visible {
-      opacity: 1;
-    }
-    #compliment img {
-      max-width: 80%;
-      height: auto;
-      border-radius: 10px;
-      margin-bottom: 10px;
-    }
-    #compliment p {
-      font-size: 1.5rem;
+      transition: opacity 0.5s ease;
     }
     
-    /* Final question styling */
+    /* Heart Rain Animation */
+    .heart-rain {
+      /* When the explosion happens, change the text to a heart and animate its fall */
+      animation: rain 3s forwards;
+      font-size: 24px;
+    }
+    @keyframes rain {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    
+    /* Final Question */
     #final-question {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 15;
       display: none;
-      opacity: 0;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
       transition: opacity 1s ease;
     }
     #final-question.visible {
-      display: block;
+      display: flex;
       opacity: 1;
     }
     #final-question h1 {
@@ -116,120 +137,111 @@
     <button id="start-btn">Enter</button>
   </div>
   
-  <!-- Compliment Container (hidden initially) -->
-  <div id="compliment-container">
-    <div id="compliment">
-      <!-- Compliment content will be injected here -->
-    </div>
-  </div>
+  <!-- Compliment Container -->
+  <div id="compliment-container"></div>
   
-  <!-- Final Question Container (hidden initially) -->
+  <!-- Final Question -->
   <div id="final-question">
     <h1>Will you be my Valentine?</h1>
     <button id="yes-btn">Yes</button>
     <button id="no-btn">No</button>
   </div>
   
-  <!-- Hidden Spotify iframe for autoplaying music (positioned off-screen) -->
+  <!-- Hidden Spotify iframe for autoplaying music -->
   <iframe id="spotify" src="https://open.spotify.com/embed/playlist/4sXPYlJMOZxEk2d5jzASBS?utm_source=generator&autoplay=1" 
           allow="autoplay" 
-          style="width:0; height:0; border:0; position:absolute; left:-9999px;">
+          style="position:absolute; left:-9999px; width:0; height:0; border:0;">
   </iframe>
   
   <script>
-    // Array of compliments paired with images.
-    const compliments = [
-      { text: "Your smile brightens my day.", image: "https://via.placeholder.com/300x200?text=Smile" },
-      { text: "You are truly amazing.", image: "https://via.placeholder.com/300x200?text=Amazing" },
-      { text: "Every moment with you is a treasure.", image: "https://via.placeholder.com/300x200?text=Treasure" },
-      { text: "You light up every room you enter.", image: "https://via.placeholder.com/300x200?text=Light" },
-      { text: "Your laughter is contagious.", image: "https://via.placeholder.com/300x200?text=Laughter" },
-      { text: "Your kindness is a gift to everyone.", image: "https://via.placeholder.com/300x200?text=Kindness" }
-      // Add more compliments as desired.
-    ];
-    
-    // How many times to cycle through the compliments array before showing the final question.
-    const totalCycles = 3;
-    let currentCycle = 0;
-    let currentIndex = 0;
-    let complimentInterval;
-    
-    // Get DOM elements.
+    // Get DOM elements
     const startScreen = document.getElementById('start-screen');
     const startBtn = document.getElementById('start-btn');
     const complimentContainer = document.getElementById('compliment-container');
-    const complimentDiv = document.getElementById('compliment');
     const finalQuestion = document.getElementById('final-question');
     
-    // Start button click: fade out start screen, then begin music and compliments.
+    // Array of compliment phrases
+    const compliments = [
+      "You are radiant.",
+      "Your laugh is infectious.",
+      "You light up the room.",
+      "Your smile is enchanting.",
+      "You are a true gem.",
+      "Your kindness knows no bounds.",
+      "You make life beautiful.",
+      "Your energy is captivating."
+    ];
+    
+    let complimentInterval;
+    
+    // When the start button is clicked...
     startBtn.addEventListener('click', () => {
-      // Fade out the start screen.
+      // Fade out the start screen
       startScreen.classList.add('fade-out');
-      // After 1 second (the fade duration), hide the start screen and start the next phase.
       setTimeout(() => {
         startScreen.style.display = 'none';
-        // The Spotify iframe is already in the DOM so music will autoplay.
-        // Begin the compliment slideshow.
+        // Music will now autoplay via the hidden Spotify iframe.
         startCompliments();
-      }, 1000);
+      }, 1000); // Matches fade-out duration
     });
     
-    // Function to start the compliment cycle.
+    // Begin adding compliments at random positions
     function startCompliments() {
-      // Make the compliment container visible.
-      complimentContainer.classList.add('visible');
-      // Display the first compliment immediately.
-      showNextCompliment();
-      // Then change compliments every 5 seconds.
-      complimentInterval = setInterval(showNextCompliment, 5000);
+      complimentContainer.style.display = 'block';
+      // Add a new compliment every 500ms
+      complimentInterval = setInterval(addCompliment, 500);
+      // After 10 seconds, trigger the explosion into hearts
+      setTimeout(triggerExplosion, 10000);
     }
     
-    // Function to display the next compliment.
-    function showNextCompliment() {
-      // If we've completed the required cycles, end the slideshow and show the final question.
-      if (currentCycle >= totalCycles && currentIndex >= compliments.length) {
-        clearInterval(complimentInterval);
-        showFinalQuestion();
-        return;
-      }
-      
-      // If we've reached the end of the current compliment array, reset the index and increment cycle count.
-      if (currentIndex >= compliments.length) {
-        currentIndex = 0;
-        currentCycle++;
-      }
-      
-      // Fade out any current compliment.
-      complimentDiv.classList.remove('visible');
-      
-      // After fade-out duration (1 second), update the content and fade in.
+    // Add a single compliment element at a random position
+    function addCompliment() {
+      const comp = document.createElement('div');
+      comp.className = 'compliment';
+      // Select a random compliment from the array
+      comp.textContent = compliments[Math.floor(Math.random() * compliments.length)];
+      // Position it randomly within the container (avoid edges with 0-90% range)
+      const randomTop = Math.random() * 90;
+      const randomLeft = Math.random() * 90;
+      comp.style.top = randomTop + '%';
+      comp.style.left = randomLeft + '%';
+      // Set a random font size between 16px and 26px
+      comp.style.fontSize = (16 + Math.random() * 10) + 'px';
+      // Append to the container
+      complimentContainer.appendChild(comp);
+      // Fade in the compliment
       setTimeout(() => {
-        const currentCompliment = compliments[currentIndex];
-        complimentDiv.innerHTML = `
-          <img src="${currentCompliment.image}" alt="Compliment Image">
-          <p>${currentCompliment.text}</p>
-        `;
-        complimentDiv.classList.add('visible');
-        currentIndex++;
-      }, 1000);
+        comp.style.opacity = 1;
+      }, 50);
     }
     
-    // Function to display the final question.
-    function showFinalQuestion() {
-      // Fade out the compliment container.
-      complimentContainer.classList.remove('visible');
-      // After the fade-out, hide the compliments and show the final question.
+    // Trigger the "explosion": convert all compliments into hearts that rain down
+    function triggerExplosion() {
+      clearInterval(complimentInterval);
+      const comps = document.querySelectorAll('.compliment');
+      comps.forEach(comp => {
+        // Change the text to a heart symbol
+        comp.textContent = '❤️';
+        // Add the heart rain animation class
+        comp.classList.add('heart-rain');
+      });
+      // After the hearts have rained down (3 seconds), display the final question
       setTimeout(() => {
         complimentContainer.style.display = 'none';
-        finalQuestion.style.display = 'block';
-        // Trigger fade-in effect on the final question.
-        setTimeout(() => {
-          finalQuestion.classList.add('visible');
-        }, 50);
-      }, 1000);
+        showFinalQuestion();
+      }, 3000);
     }
     
-    // Optional: Handle clicks on the final answer buttons.
+    // Show the final question asking "Will you be my Valentine?"
+    function showFinalQuestion() {
+      finalQuestion.style.display = 'flex';
+      // Small delay to allow the opacity transition to occur
+      setTimeout(() => {
+        finalQuestion.classList.add('visible');
+      }, 50);
+    }
+    
+    // Optional: Handle the final question buttons
     document.getElementById('yes-btn').addEventListener('click', () => {
       alert("Yay! I'm so happy!");
     });
