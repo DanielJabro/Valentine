@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Will You Be My Valentine?</title>
+  <!-- Google Font for a nice look -->
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet">
+  <style>
+    /* Basic reset and background styling */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Montserrat', sans-serif;
+      color: #fff;
+      /* Create a soft, romantic background gradient */
+      background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    
+    /* Title styling */
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    /* Paragraph styling */
+    p {
+      font-size: 1.5rem;
+      margin-bottom: 40px;
+      max-width: 80%;
+    }
+    
+    /* Button styling */
+    .btn {
+      background-color: rgba(255, 255, 255, 0.8);
+      color: #ff6f91;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+    
+    .btn:hover {
+      background-color: rgba(255, 255, 255, 1);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2.5rem;
+      }
+      p {
+        font-size: 1.2rem;
+      }
+      .btn {
+        padding: 12px 25px;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Will You Be My Valentine?</h1>
+  <p>I have something special planned just for you.</p>
+  <button class="btn" onclick="enterSite()">Enter</button>
+
+  <script>
+    // This function handles the button click.
+    // You can redirect to another page (e.g., story.html) or add more interactive behavior.
+    function enterSite() {
+      // Redirect to the next page of your story
+      window.location.href = "story.html";
+      
+      // Alternatively, you could reveal hidden content or animate elements on this page.
+      // For example:
+      // document.body.innerHTML += "<p>More content coming soon...</p>";
+    }
+  </script>
+</body>
+</html>
