@@ -3,88 +3,127 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Will You Be My Valentine?</title>
-  <!-- Google Font for a nice look -->
+  <title>A Special Message</title>
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet">
   <style>
-    /* Basic reset and background styling */
+    /* Basic reset and styling */
     body {
       margin: 0;
       padding: 0;
       font-family: 'Montserrat', sans-serif;
-      color: #fff;
-      /* Create a soft, romantic background gradient */
-      background: linear-gradient(45deg, #ff9a9e, #fad0c4);
-      height: 100vh;
+      background: #f2f2f2;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
       text-align: center;
     }
-    
-    /* Title styling */
+
     h1 {
-      font-size: 3rem;
-      margin-bottom: 20px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      margin-top: 30px;
+      color: #333;
     }
-    
-    /* Paragraph styling */
-    p {
-      font-size: 1.5rem;
-      margin-bottom: 40px;
+
+    /* Container for the Spotify embed */
+    #music {
+      margin: 20px 0;
+    }
+
+    /* Container for compliments and pictures */
+    #compliment {
       max-width: 80%;
+      margin: 20px 0;
+      transition: opacity 1s ease-in-out;
+      opacity: 0;
     }
-    
-    /* Button styling */
-    .btn {
-      background-color: rgba(255, 255, 255, 0.8);
-      color: #ff6f91;
-      border: none;
-      padding: 15px 30px;
-      font-size: 1.2rem;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+
+    /* When the container has the class "visible", it will be fully opaque */
+    #compliment.visible {
+      opacity: 1;
     }
-    
-    .btn:hover {
-      background-color: rgba(255, 255, 255, 1);
+
+    /* Style for the image inside the compliment container */
+    #compliment img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
     }
-    
-    /* Responsive adjustments */
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 2.5rem;
-      }
-      p {
-        font-size: 1.2rem;
-      }
-      .btn {
-        padding: 12px 25px;
-        font-size: 1rem;
-      }
+
+    /* Style for the compliment text */
+    #compliment p {
+      font-size: 1.5rem;
+      margin-top: 10px;
+      color: #555;
     }
   </style>
 </head>
 <body>
-  <h1>Will You Be My Valentine?</h1>
-  <p>I have something special planned just for you.</p>
-  <button class="btn" onclick="enterSite()">Enter</button>
+  <h1>A Special Message Just for You</h1>
+
+  <!-- Spotify Music Embed -->
+  <div id="music">
+    <!-- Replace YOUR_PLAYLIST_ID with your actual playlist id -->
+    <iframe src="https://open.spotify.com/embed/playlist/YOUR_PLAYLIST_ID?utm_source=generator&autoplay=1" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+  </div>
+
+  <!-- Compliment and Picture Slideshow -->
+  <div id="compliment">
+    <!-- Content will be injected here -->
+  </div>
 
   <script>
-    // This function handles the button click.
-    // You can redirect to another page (e.g., story.html) or add more interactive behavior.
-    function enterSite() {
-      // Redirect to the next page of your story
-      window.location.href = "story.html";
+    // Array of compliments and associated image URLs
+    const compliments = [
+      {
+        text: "Your smile brightens my day.",
+        image: "https://via.placeholder.com/300x200?text=Smile"
+      },
+      {
+        text: "You are truly amazing.",
+        image: "https://via.placeholder.com/300x200?text=Amazing"
+      },
+      {
+        text: "Every moment with you is a treasure.",
+        image: "https://via.placeholder.com/300x200?text=Treasure"
+      },
+      {
+        text: "You light up every room you enter.",
+        image: "https://via.placeholder.com/300x200?text=Light"
+      }
+    ];
+
+    let currentIndex = 0;
+    const complimentContainer = document.getElementById('compliment');
+
+    function showNextCompliment() {
+      // First, fade out the current content
+      complimentContainer.classList.remove('visible');
       
-      // Alternatively, you could reveal hidden content or animate elements on this page.
-      // For example:
-      // document.body.innerHTML += "<p>More content coming soon...</p>";
+      // Wait for the fade-out transition to complete (1s) before updating content
+      setTimeout(() => {
+        // Get the current compliment data
+        const currentItem = compliments[currentIndex];
+        
+        // Update the container's inner HTML with the image and text
+        complimentContainer.innerHTML = `
+          <img src="${currentItem.image}" alt="Compliment Image">
+          <p>${currentItem.text}</p>
+        `;
+        
+        // Fade the new content in by adding the "visible" class
+        complimentContainer.classList.add('visible');
+        
+        // Update the index (wrap around if needed)
+        currentIndex = (currentIndex + 1) % compliments.length;
+      }, 1000); // Matches the CSS transition duration
     }
+
+    // Start the compliment cycle once the page has fully loaded
+    window.addEventListener('load', () => {
+      // Show the first compliment immediately
+      showNextCompliment();
+      // Then, change the compliment every 5 seconds
+      setInterval(showNextCompliment, 5000);
+    });
   </script>
 </body>
 </html>
